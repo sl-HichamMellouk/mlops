@@ -1,0 +1,45 @@
+# Requêtes CURL pour tester l'API
+
+# 1. Vérifier que l'API est fonctionnelle (pas d'authentification requise)
+curl -X GET "http://127.0.0.1:8000/verify"
+
+# 2. Générer un QCM avec paramètres valides
+# Authentification: alice/wonderland (en Base64)
+curl -X POST "http://127.0.0.1:8000/generate_quiz" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Basic YWxpY2U6d29uZGVybGFuZA==" \
+  -d '{"test_type":"Test de positionnement","categories":["BDD","Systèmes distribués"],"number_of_questions":5}'
+
+# 3. Tester l'authentification échouée (mauvais mot de passe)
+curl -X POST "http://127.0.0.1:8000/generate_quiz" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Basic YWxpY2U6d3JvbmdwYXNz" \
+  -d '{"test_type":"Test de positionnement","categories":["BDD"],"number_of_questions":5}'
+
+# 4. Tester les paramètres invalides (number_of_questions invalide)
+curl -X POST "http://127.0.0.1:8000/generate_quiz" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Basic Ym9iOmJ1aWxkZXI=" \
+  -d '{"test_type":"Test de positionnement","categories":["BDD"],"number_of_questions":15}'
+
+# 5. Tester les paramètres invalides (nombre de questions insuffisant)
+curl -X POST "http://127.0.0.1:8000/generate_quiz" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Basic Y2xlbWVudGluZTptYW5kYXJpbmU=" \
+  -d '{"test_type":"Test de positionnement","categories":["NonExistent"],"number_of_questions":5}'
+
+# 6. Créer une nouvelle question (credentials admin valides)
+curl -X POST "http://127.0.0.1:8000/create_question" \
+  -H "Content-Type: application/json" \
+  -d '{"admin_username":"admin","admin_password":"4dm1N","question":"Quelle est la capitale de la France ?","subject":"Geography","correct":"B","use":"Test de positionnement","responseA":"Londres","responseB":"Paris","responseC":"Berlin","responseD":"Madrid"}'
+
+# 7. Créer une nouvelle question (credentials admin invalides)
+curl -X POST "http://127.0.0.1:8000/create_question" \
+  -H "Content-Type: application/json" \
+  -d '{"admin_username":"admin","admin_password":"wrongpassword","question":"Quelle est la capitale de l\"Espagne ?","subject":"Geography","correct":"A","use":"Test de positionnement","responseA":"Madrid","responseB":"Barcelona","responseC":"Valencia","responseD":"Seville"}'
+
+# 8. Générer 5 questions (valid request with bob/builder)
+curl -X POST "http://127.0.0.1:8000/generate_quiz" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Basic Ym9iOmJ1aWxkZXI=" \
+  -d '{"test_type":"Test de positionnement","categories":["BDD"],"number_of_questions":5}'
