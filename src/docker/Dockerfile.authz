@@ -1,0 +1,9 @@
+FROM python:3.11-slim
+
+RUN pip install --no-cache-dir requests
+
+WORKDIR /app
+COPY tests /app/tests
+WORKDIR /app/tests
+
+CMD ["python", "authorization_test.py"]

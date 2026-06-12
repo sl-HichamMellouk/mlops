@@ -1,0 +1,69 @@
+version: "3.9"
+
+services:
+  api:
+    image: datascientest/fastapi:1.0.0
+    container_name: sentiment_api
+    ports:
+      - "8000:8000"
+    networks:
+      - ci_network
+    restart: "no"
+
+  auth_test:
+    build:
+      context: .
+      dockerfile: Dockerfile.auth
+    container_name: auth_test
+    depends_on:
+      - api
+    environment:
+      API_ADDRESS: api
+      API_PORT: "8000"
+      LOG: "1"
+      LOG_PATH: /app/logs/api_test.log
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - ci_network
+    restart: "no"
+
+  authorization_test:
+    build:
+      context: .
+      dockerfile: Dockerfile.authz
+    container_name: authorization_test
+    depends_on:
+      - auth_test
+    environment:
+      API_ADDRESS: api
+      API_PORT: "8000"
+      LOG: "1"
+      LOG_PATH: /app/logs/api_test.log
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - ci_network
+    restart: "no"
+
+  content_test:
+    build:
+      context: .
+      dockerfile: Dockerfile.content
+    container_name: content_test
+    depends_on:
+      - authorization_test
+    environment:
+      API_ADDRESS: api
+      API_PORT: "8000"
+      LOG: "1"
+      LOG_PATH: /app/logs/api_test.log
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - ci_network
+    restart: "no"
+
+networks:
+  ci_network:
+    driver: bridge
